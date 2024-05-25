@@ -6,6 +6,8 @@ import (
 	"log"
 
 	_ "github.com/lib/pq"
+
+	models "obsidian_go/pkg/database/models"
 )
 
 // TODO: use dotenv
@@ -31,6 +33,21 @@ func Connect() error {
 	if err != nil {
 		panic(err)
 	}
+
+	// Create tables
+	note := &models.Note{}
+	err = note.CreateTable(db)
+	if err != nil {
+		panic(err)
+	}
+
+	note.Title = "Hello World"
+	note.Content = "This is a test note"
+	err = note.Insert(db)
+	if err != nil {
+		panic(err)
+	}
+
 	log.Print("Connected to database")
 	return nil
 }
