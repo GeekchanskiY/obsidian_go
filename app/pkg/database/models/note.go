@@ -32,3 +32,13 @@ func (n *Note) Insert(db *sql.DB) error {
 	}
 	return nil
 }
+
+func (n *Note) Select(db *sql.DB, id uint, note *Note) error {
+	err := db.QueryRow(`
+		SELECT * FROM notes WHERE id = $1
+	`, id).Scan(&note.ID, &note.Title, &note.Content)
+	if err != nil {
+		return err
+	}
+	return nil
+}

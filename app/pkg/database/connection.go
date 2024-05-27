@@ -43,10 +43,17 @@ func Connect() error {
 
 	note.Title = "Hello World"
 	note.Content = "This is a test note"
-	err = note.Insert(db)
+	//err = note.Insert(db)
 	if err != nil {
 		panic(err)
 	}
+
+	note = &models.Note{}
+	err = note.Select(db, 1, note)
+	if err != nil {
+		panic(err)
+	}
+	log.Print(note.Title)
 
 	log.Print("Connected to database")
 	return nil
