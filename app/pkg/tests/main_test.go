@@ -15,7 +15,11 @@ func TestMain(m *testing.M) {
 	os.Exit(exitCode)
 }
 
+<<<<<<< HEAD
 func TestHe(t *testing.T) {
+=======
+func TestPlayground(t *testing.T) {
+>>>>>>> 6331a2e (playing with tests)
 	if testing.Short() {
 		t.Skip("skipping test in a short mode")
 	}
