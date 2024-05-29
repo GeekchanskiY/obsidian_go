@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"time"
 
 	_ "github.com/lib/pq"
 
@@ -42,7 +43,12 @@ func Connect() error {
 	}
 
 	note.Title = "Hello World"
-	note.Content = "This is a test note"
+	note.Author = "This is a test note"
+	note.ParentNoteID = sql.NullInt64{
+		Int64: 0,
+		Valid: false,
+	}
+	note.CreatedAt = time.Now()
 	// err = note.Insert(db)
 	// if err != nil {
 	// 	panic(err)
