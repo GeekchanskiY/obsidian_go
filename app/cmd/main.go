@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"os"
 
-	"obsidian_go/pkg/database"
+	"obsidian_go/internal/database"
 )
 
 func main() {

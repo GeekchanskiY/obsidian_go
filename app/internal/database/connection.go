@@ -8,7 +8,7 @@ import (
 
 	_ "github.com/lib/pq"
 
-	models "obsidian_go/pkg/database/models"
+	models "obsidian_go/internal/database/models"
 )
 
 // TODO: use dotenv
