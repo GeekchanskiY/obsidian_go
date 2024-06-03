@@ -21,5 +21,6 @@
 go.work
 
 # Custom
+app/app.log
 app/cmd/app.log
 app/bin/main
