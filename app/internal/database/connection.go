@@ -4,24 +4,26 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	_ "github.com/lib/pq"
 
+	config "obsidian_go/config"
 	models "obsidian_go/internal/database/models"
 )
 
-// TODO: use dotenv
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "obsidian_user"
-	password = "obsidian_password"
-	dbname   = "obsidian_go"
-)
-
 func Connect() error {
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+	config.LoadConfig()
+	var (
+		host     = os.Getenv("db_host")
+		port     = os.Getenv("db_port")
+		user     = os.Getenv("db_user")
+		password = os.Getenv("db_password")
+		dbname   = os.Getenv("db_name")
+	)
+	fmt.Println(os.Getenv("db_user"))
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
 	log.Print("Connecting to database")

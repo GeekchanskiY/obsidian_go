@@ -10,7 +10,7 @@ import (
 )
 
 var required_envs = [...]string{
-	"db_host1",
+	"db_host",
 	"db_port",
 	"db_user",
 	"db_password",
