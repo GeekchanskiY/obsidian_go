@@ -49,3 +49,13 @@ func (n *Note) Select(db *sql.DB, id uint, note *Note) error {
 	}
 	return nil
 }
+
+func (n *Note) Delete(db *sql.DB, id uint) error {
+	_, err := db.Exec(`
+		DELETE FROM notes WHERE id = $1
+	`, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
