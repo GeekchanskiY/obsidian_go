@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	config "obsidian_go/config"
 	"obsidian_go/internal/database"
 )
 
@@ -17,8 +18,10 @@ func main() {
 	}
 	logger_output := io.MultiWriter(file, os.Stdout)
 	log.SetOutput(logger_output)
+
+	config.LoadConfig()
+
 	database.Connect()
-	println("Hello World")
 
 	http.HandleFunc("/about", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "About Page")
