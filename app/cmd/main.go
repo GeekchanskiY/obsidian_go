@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"runtime/trace"
 
 	"obsidian_go/internal/database"
 )
@@ -15,6 +16,17 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to open log file:", err)
 	}
+
+	f, err := os.Create("trace.out")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+	if err := trace.Start(f); err != nil {
+		fmt.Printf("failed to start trace: %v\n", err)
+		return
+	}
+	defer trace.Stop()
 	logger_output := io.MultiWriter(file, os.Stdout)
 	log.SetOutput(logger_output)
 
