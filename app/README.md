@@ -1,0 +1,1 @@
+go tool trace -http=localhost:8080 trace.out
