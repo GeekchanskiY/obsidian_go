@@ -8,16 +8,18 @@ import (
 )
 
 type Router struct {
-	routes []RouteEntry
+	routes      []RouteEntry
+	middlewares []func(http.Handler) http.Handler
 }
 
 type RouteEntry struct {
 	Path    *regexp.Regexp
 	Method  string
 	Handler http.HandlerFunc
+	// middlewares []func(http.Handler) http.Handler
 }
 
-func (rtr *Router) Route(method, path string, handlerFunc http.HandlerFunc) {
+func (rtr *Router) Route(method, path string, handlerFunc http.HandlerFunc, middlewares ...http.HandlerFunc) {
 	exactPath := regexp.MustCompile("^" + path + "$")
 
 	e := RouteEntry{
@@ -44,13 +46,6 @@ func (ent *RouteEntry) Match(r *http.Request) map[string]string {
 	return params
 }
 
-func URLParam(r *http.Request, name string) string {
-	ctx := r.Context()
-
-	params := ctx.Value("params").(map[string]string)
-	return params[name]
-}
-
 func (rtr *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -65,7 +60,9 @@ func (rtr *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			continue // No match found
 		}
 
-		// Create new request with params stored in context
+		// TODO: create middleware chain
+
+		// Add paramst to the request context
 		ctx := context.WithValue(r.Context(), "params", params)
 		e.Handler.ServeHTTP(w, r.WithContext(ctx))
 		return
