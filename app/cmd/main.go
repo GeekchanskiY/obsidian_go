@@ -43,18 +43,7 @@ func main() {
 	database.Connect()
 
 	// Start server
-	r := &rt.Router{}
-	r.Route(http.MethodGet, "/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("The Best Router!"))
-	})
-
-	r.Route(http.MethodGet, `/hello/(?P<Message>\w+)`, func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello " + rt.URLParam(r, "Message")))
-	})
-
-	r.Route("GET", "/panic", func(w http.ResponseWriter, r *http.Request) {
-		panic("something bad happened!")
-	})
+	r := rt.CreateRoutes()
 	server := http.Server{
 		Addr:    ":8080",
 		Handler: r,
