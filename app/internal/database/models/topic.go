@@ -87,3 +87,14 @@ func (t *Topic) Delete(db *sql.DB, id uint) error {
 	}
 	return nil
 }
+
+func (t *Topic) Update(db *sql.DB, id uint) error {
+	_, err := db.Exec(`
+		UPDATE topics SET note_id = $1, number = $2, text = $3
+		WHERE id = $4
+	`, t.NoteID, t.Number, t.Text, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}

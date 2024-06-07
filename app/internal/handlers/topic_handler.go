@@ -142,3 +142,27 @@ func DeleteTopicHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 	w.Write([]byte("Delete Note"))
 }
+
+func UpdateTopicHandler(w http.ResponseWriter, r *http.Request) {
+	db, err := database.Connect()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
+		return
+	}
+	topic_id, err := URLParamInt(r, "id")
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Invalid Topic Id"))
+		return
+	}
+	topic := &models.Topic{}
+	err = topic.Update(db, uint(topic_id))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Cant update this topic!"))
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Update Topic"))
+}

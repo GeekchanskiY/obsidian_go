@@ -6,11 +6,9 @@ import (
 	"net/http"
 	"obsidian_go/internal/database"
 	"obsidian_go/internal/database/models"
-	"time"
 )
 
-func CreateNoteHandler(w http.ResponseWriter, r *http.Request) {
-
+func CreateAnswerHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := database.Connect()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -25,110 +23,84 @@ func CreateNoteHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	var n models.Note
-	err = json.Unmarshal(body, &n)
+	var a models.Answer
+	err = json.Unmarshal(body, &a)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
 	}
 
-	// Validation and default values
-	n.CreatedAt = time.Now()
-
-	err = n.Insert(db)
+	err = a.Insert(db)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal Server Error"))
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte("Create Note"))
+	w.Write([]byte("Create Answer"))
 }
 
-func SelectNotesHandler(w http.ResponseWriter, r *http.Request) {
+func SelectAnswersHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := database.Connect()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal Server Error"))
 		return
 	}
-	n := models.Note{}
-	notes, err := n.SelectAll(db)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal Server Error"))
-		return
-	}
-	notes_json, err := json.Marshal(notes)
+	a := models.Answer{}
+	answers, err := a.SelectAll(db)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal Server Error"))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	w.Write(notes_json)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(answers)
 }
 
-func SelectNoteByIdHandler(w http.ResponseWriter, r *http.Request) {
+func SelectAnswerByIdHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := database.Connect()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal Server Error"))
 		return
 	}
-
-	note_id, err := URLParamInt(r, "id")
-
+	answer_id, err := URLParamInt(r, "id")
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Invalid Note Id"))
-		return
-	}
-	note := &models.Note{}
-
-	err = note.Select(db, uint(note_id))
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal Server Error"))
+		w.Write([]byte("Invalid Topic Id"))
 		return
 	}
 
-	note_json, err := json.Marshal(note)
+	a := models.Answer{}
+	err = a.Select(db, uint(answer_id))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal Server Error"))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	w.Write(note_json)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(a)
 }
 
-func DeleteNoteHandler(w http.ResponseWriter, r *http.Request) {
-
+func UpdateAnswerHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := database.Connect()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal Server Error"))
 		return
 	}
-	note_id, err := URLParamInt(r, "id")
+	answer_id, err := URLParamInt(r, "id")
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Invalid Note Id"))
+		w.Write([]byte("Invalid Answer Id"))
 		return
 	}
-	note := &models.Note{}
-	err = note.Delete(db, uint(note_id))
-	if err != nil {
-		HandleError(w, r, err)
-	}
-	w.WriteHeader(http.StatusNoContent)
-	w.Write([]byte("Delete Note"))
-}
-
-func UpdateNoteHandler(w http.ResponseWriter, r *http.Request) {
-	db, err := database.Connect()
+	a := models.Answer{}
+	err = a.Select(db, uint(answer_id))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal Server Error"))
@@ -140,24 +112,42 @@ func UpdateNoteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
-	note_id, err := URLParamInt(r, "id")
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Invalid Note Id"))
-		return
-	}
-	n := models.Note{}
-	err = json.Unmarshal(body, &n)
+	err = json.Unmarshal(body, &a)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
 	}
-	err = n.Update(db, uint(note_id))
+	err = a.Update(db, uint(answer_id))
 	if err != nil {
-		HandleError(w, r, err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Update Note"))
+	w.Write([]byte("Update Answer"))
+}
+
+func DeleteAnswerHandler(w http.ResponseWriter, r *http.Request) {
+	db, err := database.Connect()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
+		return
+	}
+	answer_id, err := URLParamInt(r, "id")
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Invalid Answer Id"))
+		return
+	}
+	a := models.Answer{}
+	err = a.Delete(db, uint(answer_id))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Delete Answer"))
 }
