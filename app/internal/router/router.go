@@ -46,6 +46,17 @@ func (ent *RouteEntry) Match(r *http.Request) map[string]string {
 	return params
 }
 
+func (r *Router) ApplyMiddlewares(handler http.Handler) http.Handler {
+	for i := len(r.middlewares) - 1; i >= 0; i-- {
+		handler = r.middlewares[i](handler)
+	}
+	return handler
+}
+
+func (r *Router) Use(mw func(http.Handler) http.Handler) {
+	r.middlewares = append(r.middlewares, mw)
+}
+
 func (rtr *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -60,11 +71,9 @@ func (rtr *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			continue // No match found
 		}
 
-		// TODO: create middleware chain
-
-		// Add paramst to the request context
 		ctx := context.WithValue(r.Context(), "params", params)
-		e.Handler.ServeHTTP(w, r.WithContext(ctx))
+		handler := rtr.ApplyMiddlewares(e.Handler)
+		handler.ServeHTTP(w, r.WithContext(ctx))
 		return
 	}
 
