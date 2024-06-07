@@ -80,3 +80,14 @@ func (n *Note) Delete(db *sql.DB, id uint) error {
 	}
 	return nil
 }
+
+func (n *Note) Update(db *sql.DB, id uint) error {
+	_, err := db.Exec(`
+		UPDATE notes SET title = $1, author = $2, parent_note = $3
+		WHERE id = $4
+	`, n.Title, n.Author, n.ParentNoteID, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
