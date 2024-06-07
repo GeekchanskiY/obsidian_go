@@ -70,7 +70,7 @@ func SelectNotesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(notes_json))
+	w.Write(notes_json)
 }
 
 func SelectNoteByIdHandler(w http.ResponseWriter, r *http.Request) {
@@ -98,7 +98,7 @@ func SelectNoteByIdHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(note_json))
+	w.Write(note_json)
 }
 
 func DeleteNoteHandler(w http.ResponseWriter, r *http.Request) {
