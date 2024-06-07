@@ -2,15 +2,44 @@ package handlers
 
 import (
 	"encoding/json"
-	"log"
+	"io"
 	"net/http"
 	"obsidian_go/internal/database"
 	"obsidian_go/internal/database/models"
+	"time"
 )
 
 func CreateNoteHandler(w http.ResponseWriter, r *http.Request) {
+
+	db, err := database.Connect()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
+	}
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Error reading request body", http.StatusInternalServerError)
+		return
+	}
+	defer r.Body.Close()
+
+	var n models.Note
+	err = json.Unmarshal(body, &n)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+	}
+
+	// Validation and default values
+	n.CreatedAt = time.Now()
+
+	err = n.Insert(db)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
+	}
 	w.WriteHeader(http.StatusOK)
-	log.Println(URLParamInt(r, "id"))
 	w.Write([]byte("Create Note"))
 }
 

@@ -68,7 +68,10 @@ func (rtr *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	for _, e := range rtr.routes {
 		params := e.Match(r)
 		if params == nil {
-			continue // No match found
+			continue
+		}
+		if e.Method != r.Method {
+			continue
 		}
 
 		ctx := context.WithValue(r.Context(), "params", params)
