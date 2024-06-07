@@ -52,7 +52,7 @@ func main() {
 		Addr:    fmt.Sprintf("%s:%s", os.Getenv("server_host"), os.Getenv("server_port")),
 		Handler: r,
 	}
-
+	log.Println("Server started!")
 	err = server.ListenAndServe()
 	if err != nil {
 		log.Fatal(err)
