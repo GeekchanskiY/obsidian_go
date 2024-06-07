@@ -15,15 +15,31 @@ func CreateNoteHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func SelectNotesHandler(w http.ResponseWriter, r *http.Request) {
+	db, err := database.Connect()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
+	}
+	n := models.Note{}
+	notes, err := n.SelectAll(db)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
+	}
+	notes_json, err := json.Marshal(notes)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
+	}
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Select Notes"))
+	w.Write([]byte(notes_json))
 }
 
 func SelectNoteByIdHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := database.Connect()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal Server Error 1 "))
+		w.Write([]byte("Internal Server Error"))
 	}
 
 	note_id, err := URLParamInt(r, "id")
@@ -34,11 +50,11 @@ func SelectNoteByIdHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	note := &models.Note{}
 
-	note.Select(db, uint(note_id), note)
+	note.Select(db, uint(note_id))
 	note_json, err := json.Marshal(note)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal Server Error 2"))
+		w.Write([]byte("Internal Server Error"))
 	}
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(note_json))

@@ -40,7 +40,7 @@ func (n *Note) Insert(db *sql.DB) error {
 	return nil
 }
 
-func (n *Note) Select(db *sql.DB, id uint, note *Note) error {
+func (note *Note) Select(db *sql.DB, id uint) error {
 	err := db.QueryRow(`
 		SELECT * FROM notes WHERE id = $1
 	`, id).Scan(&note.ID, &note.Title, &note.Author, &note.ParentNoteID, &note.CreatedAt)
@@ -48,6 +48,27 @@ func (n *Note) Select(db *sql.DB, id uint, note *Note) error {
 		return err
 	}
 	return nil
+}
+
+func (note *Note) SelectAll(db *sql.DB) ([]Note, error) {
+
+	rows, err := db.Query(`
+		SELECT * FROM notes
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var notes []Note
+	for rows.Next() {
+		var note Note
+		if err := rows.Scan(&note.ID, &note.Title, &note.Author, &note.ParentNoteID, &note.CreatedAt); err != nil {
+			return nil, err
+		}
+		notes = append(notes, note)
+	}
+
+	return notes, nil
 }
 
 func (n *Note) Delete(db *sql.DB, id uint) error {
