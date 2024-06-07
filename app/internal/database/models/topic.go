@@ -16,7 +16,7 @@ func (t *Topic) CreateTable(db *sql.DB) error {
 	_, err := db.Exec(`
 	CREATE TABLE IF NOT EXISTS topics (
 		id SERIAL PRIMARY KEY,
-		note_id INTEGER REFERENCES notes(id) NOT NULL,
+		note_id INTEGER REFERENCES notes(id) ON DELETE CASCADE,
 		number INTEGER NOT NULL,
 		text VARCHAR NOT NULL
 	);
@@ -76,4 +76,14 @@ func (t *Topic) SelectAll(db *sql.DB) ([]Topic, error) {
 		topics = append(topics, topic)
 	}
 	return topics, nil
+}
+
+func (t *Topic) Delete(db *sql.DB, id uint) error {
+	_, err := db.Exec(`
+		DELETE FROM topics WHERE id = $1
+	`, id)
+	if err != nil {
+		return err
+	}
+	return nil
 }
