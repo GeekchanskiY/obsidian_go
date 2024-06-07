@@ -53,6 +53,14 @@ func Connect() (*sql.DB, error) {
 			log.Printf("Failed to create tables: %v", err)
 			return
 		}
+
+		topic := &models.Topic{}
+		err = topic.CreateTable(connection)
+		if err != nil {
+			log.Printf("Failed to create tables: %v", err)
+			return
+		}
+
 		log.Println("Connected to database")
 	},
 	)
