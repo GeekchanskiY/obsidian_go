@@ -3,13 +3,10 @@ package handlers
 import (
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
 	"obsidian_go/internal/database"
 	"obsidian_go/internal/database/models"
 	"time"
-
-	"github.com/lib/pq"
 )
 
 func CreateNoteHandler(w http.ResponseWriter, r *http.Request) {
@@ -124,18 +121,7 @@ func DeleteNoteHandler(w http.ResponseWriter, r *http.Request) {
 	note := &models.Note{}
 	err = note.Delete(db, uint(note_id))
 	if err != nil {
-		// TODO: make this look less messy
-		if err, ok := err.(*pq.Error); ok {
-			log.Printf("psql error: %s, %s \n", err.Code, err.Message)
-			if err.Code == "23503" {
-				w.WriteHeader(http.StatusBadRequest)
-				w.Write([]byte("Cant delete this note, because there are other notes with this parent note"))
-				return
-			}
-		}
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("No Note Found"))
-		return
+		HandleError(w, r, err)
 	}
 	w.WriteHeader(http.StatusNoContent)
 	w.Write([]byte("Delete Note"))
