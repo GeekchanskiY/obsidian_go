@@ -40,7 +40,11 @@ func main() {
 	defer trace.Stop()
 
 	// Connect to database
-	database.Connect()
+	connection, err := database.Connect()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer connection.Close()
 
 	// Start server
 	r := rt.CreateRoutes()
