@@ -3,10 +3,13 @@ package handlers
 import (
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 	"obsidian_go/internal/database"
 	"obsidian_go/internal/database/models"
 	"time"
+
+	"github.com/lib/pq"
 )
 
 func CreateNoteHandler(w http.ResponseWriter, r *http.Request) {
@@ -15,6 +18,7 @@ func CreateNoteHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal Server Error"))
+		return
 	}
 
 	body, err := io.ReadAll(r.Body)
@@ -29,6 +33,7 @@ func CreateNoteHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
+		return
 	}
 
 	// Validation and default values
@@ -38,6 +43,7 @@ func CreateNoteHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal Server Error"))
+		return
 	}
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Create Note"))
@@ -48,17 +54,20 @@ func SelectNotesHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal Server Error"))
+		return
 	}
 	n := models.Note{}
 	notes, err := n.SelectAll(db)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal Server Error"))
+		return
 	}
 	notes_json, err := json.Marshal(notes)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal Server Error"))
+		return
 	}
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(notes_json))
@@ -69,6 +78,7 @@ func SelectNoteByIdHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal Server Error"))
+		return
 	}
 
 	note_id, err := URLParamInt(r, "id")
@@ -76,6 +86,7 @@ func SelectNoteByIdHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Invalid Note Id"))
+		return
 	}
 	note := &models.Note{}
 
@@ -84,7 +95,41 @@ func SelectNoteByIdHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal Server Error"))
+		return
 	}
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(note_json))
+}
+
+func DeleteNoteHandler(w http.ResponseWriter, r *http.Request) {
+
+	db, err := database.Connect()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
+		return
+	}
+	note_id, err := URLParamInt(r, "id")
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Invalid Note Id"))
+		return
+	}
+	note := &models.Note{}
+	err = note.Delete(db, uint(note_id))
+	if err != nil {
+		if err, ok := err.(*pq.Error); ok {
+			log.Printf("psql error: %s, %s \n", err.Code, err.Message)
+			if err.Code == "23503" {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte("Cant delete this note, because there are other notes with this parent note"))
+				return
+			}
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("No Note Found"))
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Delete Note"))
 }

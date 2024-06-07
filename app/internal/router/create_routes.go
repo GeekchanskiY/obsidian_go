@@ -8,6 +8,7 @@ func CreateRoutes() *Router {
 	router.Route("GET", `/notes/(?P<id>\w+)`, handlers.SelectNoteByIdHandler)
 	router.Route("GET", `/notes`, handlers.SelectNotesHandler)
 	router.Route("POST", `/notes`, handlers.CreateNoteHandler)
+	router.Route("DELETE", `/notes/(?P<id>\w+)`, handlers.DeleteNoteHandler)
 
 	return router
 }
