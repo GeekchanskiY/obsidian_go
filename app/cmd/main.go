@@ -45,9 +45,12 @@ func main() {
 	// Start server
 	r := rt.CreateRoutes()
 	server := http.Server{
-		Addr:    ":8080",
+		Addr:    fmt.Sprintf("%s:%s", os.Getenv("server_host"), os.Getenv("server_port")),
 		Handler: r,
 	}
 
-	server.ListenAndServe()
+	err = server.ListenAndServe()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
