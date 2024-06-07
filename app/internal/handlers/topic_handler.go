@@ -55,6 +55,90 @@ func CreateTopicHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Internal Server Error"))
 		return
 	}
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("Create Topic"))
+}
+
+func SelectTopicsHandler(w http.ResponseWriter, r *http.Request) {
+	db, err := database.Connect()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
+		return
+	}
+	n := models.Topic{}
+	topics, err := n.SelectAll(db)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
+		return
+	}
+
+	topics_json, err := json.Marshal(topics)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(topics_json)
+}
+
+func SelectTopicByIdHandler(w http.ResponseWriter, r *http.Request) {
+	db, err := database.Connect()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
+		return
+	}
+	topic_id, err := URLParamInt(r, "id")
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Invalid Topic Id"))
+		return
+	}
+
+	topic := models.Topic{}
+	err = topic.Select(db, uint(topic_id))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
+		return
+	}
+
+	topic_json, err := json.Marshal(topic)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(topic_json)
+}
+
+func DeleteTopicHandler(w http.ResponseWriter, r *http.Request) {
+
+	db, err := database.Connect()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
+		return
+	}
+	topic_id, err := URLParamInt(r, "id")
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Invalid Topic Id"))
+		return
+	}
+	topic := &models.Topic{}
+	err = topic.Delete(db, uint(topic_id))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Cant delete this topic!"))
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+	w.Write([]byte("Delete Note"))
 }

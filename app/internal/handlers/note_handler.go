@@ -45,7 +45,7 @@ func CreateNoteHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Internal Server Error"))
 		return
 	}
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("Create Note"))
 }
 
@@ -90,7 +90,13 @@ func SelectNoteByIdHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	note := &models.Note{}
 
-	note.Select(db, uint(note_id))
+	err = note.Select(db, uint(note_id))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
+		return
+	}
+
 	note_json, err := json.Marshal(note)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -131,6 +137,6 @@ func DeleteNoteHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("No Note Found"))
 		return
 	}
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusNoContent)
 	w.Write([]byte("Delete Note"))
 }
