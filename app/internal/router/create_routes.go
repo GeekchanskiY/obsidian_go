@@ -18,5 +18,11 @@ func CreateRoutes() *Router {
 	router.Route("GET", `/topics/(?P<id>\w+)`, handlers.SelectTopicByIdHandler)
 	router.Route("DELETE", `/topics/(?P<id>\w+)`, handlers.DeleteTopicHandler)
 
+	// Question Routes
+	router.Route("POST", `/questions`, handlers.CreateQuestionHandler)
+	router.Route("GET", `/questions`, handlers.SelectQuestionsHandler)
+	router.Route("GET", `/questions/(?P<id>\w+)`, handlers.SelectQuestionByIdHandler)
+	router.Route("DELETE", `/questions/(?P<id>\w+)`, handlers.DeleteQuestionHandler)
+
 	return router
 }
