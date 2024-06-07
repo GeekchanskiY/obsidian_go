@@ -118,6 +118,7 @@ func DeleteNoteHandler(w http.ResponseWriter, r *http.Request) {
 	note := &models.Note{}
 	err = note.Delete(db, uint(note_id))
 	if err != nil {
+		// TODO: make this look less messy
 		if err, ok := err.(*pq.Error); ok {
 			log.Printf("psql error: %s, %s \n", err.Code, err.Message)
 			if err.Code == "23503" {
