@@ -60,7 +60,7 @@ func (r *Router) Use(mw func(http.Handler) http.Handler) {
 func (rtr *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Println("ERROR:", r) // Log the error
+			log.Printf("Error: \n %+v", r) // Log the error
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		}
 	}()

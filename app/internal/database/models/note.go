@@ -6,11 +6,11 @@ import (
 )
 
 type Note struct {
-	ID           int
-	Title        string
-	Author       string
-	ParentNoteID sql.NullInt64
-	CreatedAt    time.Time
+	ID           int           `json:"id"`
+	Title        string        `json:"title"`
+	Author       string        `json:"author"`
+	ParentNoteID sql.NullInt64 `json:"parent_note_id"`
+	CreatedAt    time.Time     `json:"created_at"`
 }
 
 func (n *Note) CreateTable(db *sql.DB) error {
